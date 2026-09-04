@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Models\User;
+use App\Notifications\ActivityNotification;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
@@ -17,6 +19,11 @@ class TicketController extends Controller
     public function create()
     {
         return view('pages.dashboard.admin.tickets.create');
+    }
+
+    public function edit(Ticket $ticket)
+    {
+        return view('pages.dashboard.admin.tickets.edit', compact('ticket'));
     }
 
     public function store(Request $request)
@@ -37,6 +44,10 @@ class TicketController extends Controller
             'status' => 'open'
         ]);
 
+        User::role('super-admin')->where('id', '!=', auth()->id())->get()->each(function (User $admin) use ($ticket): void {
+            $admin->notify(new ActivityNotification("New ticket #{$ticket->id} was created.", route('admin.tickets.show', $ticket)));
+        });
+
         return redirect()->route('admin.tickets.index')
             ->with('success', 'Ticket created successfully!');
     }
@@ -50,6 +61,21 @@ class TicketController extends Controller
     {
         $ticket->update($request->only(['status', 'priority', 'assigned_to']));
         return redirect()->back()->with('success', 'Ticket updated!');
+    }
+
+    public function resolve(Ticket $ticket)
+    {
+        $ticket->update(['status' => 'resolved', 'resolved_at' => now()]);
+
+        return redirect()->back()->with('success', 'Ticket resolved!');
+    }
+
+    public function respond(Request $request, Ticket $ticket)
+    {
+        $data = $request->validate(['message' => ['required', 'string', 'max:5000']]);
+        $ticket->responses()->create(['user_id' => auth()->id(), 'message' => $data['message']]);
+
+        return redirect()->back()->with('success', 'Response added!');
     }
 
     public function destroy(Ticket $ticket)

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use App\Models\User;
 
 class RoleSeeder extends Seeder
 {
@@ -29,23 +28,5 @@ class RoleSeeder extends Seeder
         $staff->givePermissionTo(['manage-tickets', 'view-reports']);
         $student->givePermissionTo(['manage-tickets', 'manage-payments']);
 
-        // demo users
-        $adminUser = User::firstOrCreate(['email' => 'admin@example.com'], [
-            'name' => 'Admin User',
-            'password' => bcrypt('password'),
-        ]);
-        $adminUser->assignRole('super-admin');
-
-        $staffUser = User::firstOrCreate(['email' => 'staff@example.com'], [
-            'name' => 'IT Staff',
-            'password' => bcrypt('password'),
-        ]);
-        $staffUser->assignRole('it-staff');
-
-        $studentUser = User::firstOrCreate(['email' => 'student@example.com'], [
-            'name' => 'Student User',
-            'password' => bcrypt('password'),
-        ]);
-        $studentUser->assignRole('student');
     }
 }

@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'payments' => [
+        'bkash_merchant' => env('BKASH_MERCHANT_NUMBER'),
+        'nagad_merchant' => env('NAGAD_MERCHANT_NUMBER'),
+    ],
+
 ];

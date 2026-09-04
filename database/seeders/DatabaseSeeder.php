@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\RoleSeeder;
@@ -16,13 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // run role seeder (if Spatie is installed)
+        // ১. রোল সিডার রান করুন (Spatie Permission থাকলে)
         $this->callIfExists(RoleSeeder::class);
 
-        // default test user
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $this->command->info('Roles and permissions created. Create users through registration or the admin:create command.');
+    }
+
+    /**
+     * শুধুমাত্র যদি ক্লাস থাকে তবেই কল করবে
+     */
+    private function callIfExists($class)
+    {
+        if (class_exists($class)) {
+            $this->call($class);
+        }
     }
 }

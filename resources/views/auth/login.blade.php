@@ -1,47 +1,418 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+{{-- resources/views/auth/login.blade.php --}}
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'GUB IT Service') }} - Login</title>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+    <style>
+        /* ----- রিসেট ও বেসিক স্টাইল ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0A0A0F;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        /* ----- অ্যানিমেটেড ব্যাকগ্রাউন্ড (Rise at Seven ভাইব) ----- */
+        .bg-gradient-glow {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(255, 107, 53, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255, 107, 53, 0.05) 0%, transparent 40%),
+                #0A0A0F;
+        }
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+        .glow-orb:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: #FF6B35;
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .glow-orb:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: #FF8F65;
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* ----- গ্লাসমরফিজম কার্ড ----- */
+        .auth-card {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem 2rem;
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----- লোগো ----- */
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #FF6B35, #FF8F65);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(-6deg) scale(1.05);
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text span {
+            background: linear-gradient(135deg, #FF6B35, #FF8F65);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* ----- ফর্ম এলিমেন্ট ----- */
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.01em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #FF6B35;
+            background: rgba(255, 107, 53, 0.06);
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .form-error {
+            margin-top: 0.5rem;
+            font-size: 0.825rem;
+            color: #f87171;
+        }
+
+        /* ----- রিমেম্বার মি চেকবক্স ----- */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #FF6B35;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        /* ----- বাটন ----- */
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #FF6B35, #FF8F65);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-primary:hover::after {
+            opacity: 1;
+        }
+
+        /* ----- ফুটার লিংক ----- */
+        .auth-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .auth-footer a {
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: #FF6B35;
+            text-decoration: underline;
+        }
+
+        /* ----- সেশন স্ট্যাটাস (error/success) ----- */
+        .session-status {
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .session-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .session-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        /* ----- রেসপন্সিভ ----- */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 2rem 1.25rem;
+                border-radius: 24px;
+            }
+            .logo-text {
+                font-size: 1.25rem;
+            }
+            .auth-footer {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    {{-- অ্যানিমেটেড ব্যাকগ্রাউন্ড --}}
+    <div class="bg-gradient-glow">
+        <div class="glow-orb"></div>
+        <div class="glow-orb"></div>
+    </div>
+
+    {{-- মেইন কার্ড --}}
+    <div class="auth-card">
+        {{-- লোগো --}}
+        <a href="{{ route('home') }}" class="logo">
+            <div class="logo-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <div class="logo-text">GUB<span>.</span></div>
+        </a>
+
+        {{-- হেডিং --}}
+        <h2 class="text-center text-2xl font-bold text-white mb-1" style="font-family: 'Space Grotesk', sans-serif;">
+            Welcome Back
+        </h2>
+        <p class="text-center text-white/50 text-sm mb-6">
+            Log in to manage IT services
+        </p>
+
+        {{-- সেশন স্ট্যাটাস (error/success) --}}
+        @if (session('status'))
+            <div class="session-status success">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="session-status error">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        {{-- লগইন ফর্ম --}}
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            {{-- ইমেইল --}}
+            <div>
+                <label for="email" class="form-label">Email Address</label>
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    class="form-input"
+                    placeholder="you@example.com"
+                    value="{{ old('email') }}"
+                    required
+                    autofocus
+                    autocomplete="username"
+                />
+                @error('email')
+                    <p class="form-error">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- পাসওয়ার্ড --}}
+            <div class="mt-4">
+                <label for="password" class="form-label">Password</label>
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                />
+                @error('password')
+                    <p class="form-error">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- রিমেম্বার মি --}}
+            <div class="checkbox-wrapper">
+                <input id="remember_me" type="checkbox" name="remember">
+                <label for="remember_me">Remember me</label>
+            </div>
+
+            {{-- বাটন ও ফুটার --}}
+            <button type="submit" class="btn-primary mt-6">
+                Log in
+            </button>
+
+            <div class="auth-footer">
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}">
+                        Forgot password?
+                    </a>
+                @endif
+                <a href="{{ route('register') }}">
+                    Create account →
                 </a>
-            @endif
+            </div>
+        </form>
+    </div>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+    {{-- এনিমেশন স্ক্রিপ্ট --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.querySelector('.auth-card');
+            if (card) {
+                card.style.animation = 'fadeInUp 0.8s ease forwards';
+            }
+        });
+    </script>
+
+</body>
+</html>

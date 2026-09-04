@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ITStaff;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Notifications\ActivityNotification;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
@@ -24,6 +25,7 @@ class TicketController extends Controller
         $ticket->assigned_to = auth()->id();
         $ticket->status = 'assigned';
         $ticket->save();
+        $ticket->user?->notify(new ActivityNotification("Ticket #{$ticket->id} was assigned to IT staff.", route('student.tickets.show', $ticket)));
         return redirect()->back()->with('success', 'Assigned to you');
     }
 
@@ -32,6 +34,7 @@ class TicketController extends Controller
         $ticket->status = 'resolved';
         $ticket->resolved_at = now();
         $ticket->save();
+        $ticket->user?->notify(new ActivityNotification("Ticket #{$ticket->id} has been resolved.", route('student.tickets.show', $ticket)));
         return redirect()->back()->with('success', 'Ticket resolved');
     }
 }
