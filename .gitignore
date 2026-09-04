@@ -1,0 +1,58 @@
+### Laravel & general
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*.local
+.env.backup
+.env.production
+
+# Composer
+/vendor/
+
+# Node
+/node_modules/
+/.pnp
+.pnp.js
+.parcel-cache/
+
+# Build
+/public/build/
+/public/hot
+/public/storage
+
+# Storage & caches (do not ignore storage/app/public if you want uploaded assets in repo)
+/storage/*.key
+/storage/framework/cache/data/
+/storage/framework/sessions/
+/storage/framework/views/
+/bootstrap/cache/*.php
+
+# IDEs and editor folders
+/.idea/
+/.vscode/
+/.phpstorm.meta.php
+/.nova/
+
+# Testing
+.phpunit.result.cache
+/.phpunit.cache
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# Other
+/auth.json
+/.fleet
+/.zed
+
